@@ -93,9 +93,22 @@ fi
 # Update nginx configuration
 print_status "Updating nginx configuration..."
 
-# Copy WordPress site config first
-docker cp ./nginx/sites/wordpress-blog.conf crm_abz_nginx:/etc/nginx/sites-available/
-docker cp ./nginx/sites/crm-access.conf crm_abz_nginx:/etc/nginx/sites-available/
+# Copy WordPress site config to CRM nginx host directory (volume is read-only)
+print_status "Copying WordPress nginx configs to CRM nginx host directory..."
+
+# Find CRM directory and copy WordPress configs there
+CRM_DIR=$(find /root -name "docker-compose.yml" -exec grep -l "crm_abz_nginx" {} \; | head -1 | xargs dirname)
+if [ -z "$CRM_DIR" ]; then
+    print_error "Could not find CRM directory with nginx configuration"
+    exit 1
+fi
+
+print_status "Found CRM directory: $CRM_DIR"
+
+# Copy WordPress nginx configs to CRM nginx/sites directory
+cp ./nginx/sites/wordpress-blog.conf "$CRM_DIR/nginx/sites/"
+cp ./nginx/sites/crm-access.conf "$CRM_DIR/nginx/sites/"
+print_success "WordPress nginx configs copied to CRM directory"
 
 # Copy new nginx config to temp location and move it
 docker cp ./nginx/nginx-updated.conf crm_abz_nginx:/tmp/nginx.conf.new
