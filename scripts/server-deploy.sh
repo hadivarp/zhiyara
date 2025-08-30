@@ -96,11 +96,19 @@ print_status "Updating nginx configuration..."
 # Copy WordPress site config to CRM nginx host directory (volume is read-only)
 print_status "Copying WordPress nginx configs to CRM nginx host directory..."
 
-# Find CRM directory and copy WordPress configs there
-CRM_DIR=$(find /root -name "docker-compose.yml" -exec grep -l "crm_abz_nginx" {} \; | head -1 | xargs dirname)
-if [ -z "$CRM_DIR" ]; then
-    print_error "Could not find CRM directory with nginx configuration"
-    exit 1
+# Find CRM directory - check common locations
+if [ -d "/root/crm-abz" ]; then
+    CRM_DIR="/root/crm-abz"
+elif [ -d "/var/www/crm-abz" ]; then
+    CRM_DIR="/var/www/crm-abz"
+else
+    # Try to find it automatically
+    CRM_COMPOSE_FILE=$(find /root -name "docker-compose.yml" -exec grep -l "crm_abz_nginx" {} \; 2>/dev/null | head -1)
+    if [ -z "$CRM_COMPOSE_FILE" ]; then
+        print_error "Could not find CRM directory. Please specify CRM_DIR manually."
+        exit 1
+    fi
+    CRM_DIR=$(dirname "$CRM_COMPOSE_FILE")
 fi
 
 print_status "Found CRM directory: $CRM_DIR"
