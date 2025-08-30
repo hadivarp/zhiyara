@@ -90,72 +90,36 @@ if ! docker-compose -f docker-compose.server.yml ps | grep -q "Up"; then
     exit 1
 fi
 
-# Update nginx configuration
-print_status "Updating nginx configuration..."
-
-# Copy WordPress site config to CRM nginx host directory (volume is read-only)
-print_status "Copying WordPress nginx configs to CRM nginx host directory..."
-
-# Find CRM directory - check common locations
-if [ -d "/root/crm-abz" ]; then
-    CRM_DIR="/root/crm-abz"
-elif [ -d "/var/www/crm-abz" ]; then
-    CRM_DIR="/var/www/crm-abz"
-else
-    # Try to find it automatically
-    CRM_COMPOSE_FILE=$(find /root -name "docker-compose.yml" -exec grep -l "crm_abz_nginx" {} \; 2>/dev/null | head -1)
-    if [ -z "$CRM_COMPOSE_FILE" ]; then
-        print_error "Could not find CRM directory. Please specify CRM_DIR manually."
-        exit 1
-    fi
-    CRM_DIR=$(dirname "$CRM_COMPOSE_FILE")
-fi
-
-print_status "Found CRM directory: $CRM_DIR"
-
-# Copy WordPress nginx configs to CRM nginx/sites directory
-cp ./nginx/sites/wordpress-blog.conf "$CRM_DIR/nginx/sites/"
-cp ./nginx/sites/crm-access.conf "$CRM_DIR/nginx/sites/"
-print_success "WordPress nginx configs copied to CRM directory"
-
-# Update main nginx config by copying to host directory and restarting
-print_status "Updating main nginx configuration..."
-cp ./nginx/nginx-updated.conf "$CRM_DIR/nginx/nginx.conf"
-
-# Restart nginx to pick up new configuration
-print_status "Restarting nginx with new configuration..."
-docker restart crm_abz_nginx
-
-# Wait for nginx to start
-sleep 10
-
-# Test nginx configuration
-if docker exec crm_abz_nginx nginx -t; then
-    print_success "Nginx configuration updated successfully!"
-else
-    print_error "Nginx configuration test failed! Restoring backup..."
-    cp ./backups/nginx.conf.backup.* "$CRM_DIR/nginx/nginx.conf" 2>/dev/null || true
-    docker restart crm_abz_nginx
-    exit 1
-fi
+# WordPress is now running standalone on port 8080
+print_status "WordPress is running on port 8080 (standalone mode)"
+print_success "No nginx integration needed - WordPress runs independently"
 
 # Final health checks
 print_status "Running final health checks..."
 sleep 10
 
-# Check if WordPress is accessible through nginx
-if curl -f -s http://localhost/health > /dev/null 2>&1; then
-    print_success "WordPress integration deployed successfully!"
+# Check if WordPress is accessible on port 8080
+if curl -f -s http://localhost:8080/health > /dev/null 2>&1; then
+    print_success "WordPress deployed successfully on port 8080!"
 else
     print_warning "WordPress containers are running but health check failed. This might be normal on first setup."
 fi
 
 print_success "Deployment completed!"
 echo ""
+print_status "WordPress is now accessible at:"
+echo "  • http://65.109.219.107:8080 (direct IP access)"
+echo "  • http://zhiyara.com:8080 (after DNS setup)"
+echo ""
+print_status "Your setup:"
+echo "  • CRM: http://65.109.219.107:4000 (unchanged)"
+echo "  • WordPress: http://65.109.219.107:8080 (new)"
+echo ""
 print_status "Next steps:"
-echo "  1. Point zhiyara.com DNS to your server IP: 65.109.219.107"
-echo "  2. Set up SSL certificates for zhiyara.com"
-echo "  3. Complete WordPress installation at: http://zhiyara.com"
+echo "  1. Point zhiyara.com DNS A record to: 65.109.219.107"
+echo "  2. Access WordPress setup at: http://65.109.219.107:8080"
+echo "  3. Complete WordPress installation"
+echo "  4. Optional: Set up SSL and port 80 redirect later"
 echo "  4. Configure WordPress settings and themes"
 echo ""
 print_status "Your setup:"
