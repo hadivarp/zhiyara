@@ -1,0 +1,88 @@
+version: '3.8'
+
+# WordPress integration with existing Rails CRM server
+# This adds WordPress to your existing crm_abz_net network
+
+services:
+  # WordPress Application
+  wordpress:
+    image: wordpress:6.4-php8.1-fpm
+    container_name: zhiyara_wordpress
+    restart: unless-stopped
+    depends_on:
+      - wordpress_db
+    environment:
+      WORDPRESS_DB_HOST: wordpress_db:3306
+      WORDPRESS_DB_USER: ${WP_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WP_DB_NAME}
+      WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
+      WORDPRESS_DEBUG: ${WP_DEBUG:-false}
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./config/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./config/wp-config-extra.php:/var/www/html/wp-config-extra.php
+    networks:
+      - crm_abz_net  # Connect to existing Rails network
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # WordPress MySQL Database (separate from Rails PostgreSQL)
+  wordpress_db:
+    image: mysql:8.0
+    container_name: zhiyara_wordpress_db
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${WP_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${WP_DB_NAME}
+      MYSQL_USER: ${WP_DB_USER}
+      MYSQL_PASSWORD: ${WP_DB_PASSWORD}
+    volumes:
+      - wordpress_db_data:/var/lib/mysql
+      - ./scripts/mysql-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - crm_abz_net
+    ports:
+      - "3307:3306"  # Different port to avoid conflicts
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # WordPress Nginx (internal, proxied by main nginx)
+  wordpress_nginx:
+    image: nginx:alpine
+    container_name: zhiyara_wordpress_nginx
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress_data:/var/www/html:ro
+      - ./nginx/sites/wordpress.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - crm_abz_net
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  wordpress_data:
+    driver: local
+  wordpress_db_data:
+    driver: local
+
+# Use existing network from Rails setup
+networks:
+  crm_abz_net:
+    external: true

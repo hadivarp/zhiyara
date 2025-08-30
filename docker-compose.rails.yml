@@ -1,0 +1,88 @@
+version: '3.8'
+
+# Rails + WordPress Integration Compose File
+# This extends the main WordPress setup to include Rails backend
+
+services:
+  # Rails Application
+  rails:
+    build:
+      context: ../rails-app  # Adjust path to your Rails app
+      dockerfile: Dockerfile
+    container_name: zhiyara_rails
+    restart: unless-stopped
+    depends_on:
+      - rails_db
+      - redis
+    environment:
+      RAILS_ENV: ${RAILS_ENV:-production}
+      DATABASE_URL: postgresql://rails_user:${RAILS_DB_PASSWORD}@rails_db:5432/zhiyara_rails
+      REDIS_URL: redis://redis:6379
+      WORDPRESS_API_URL: http://wordpress_nginx/wp-json/wp/v2
+      SECRET_KEY_BASE: ${RAILS_SECRET_KEY_BASE}
+    volumes:
+      - rails_uploads:/app/storage
+      - ./shared:/app/shared  # Shared assets between Rails and WordPress
+    networks:
+      - shared_network
+      - rails_internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL for Rails
+  rails_db:
+    image: postgres:15-alpine
+    container_name: zhiyara_rails_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: zhiyara_rails
+      POSTGRES_USER: rails_user
+      POSTGRES_PASSWORD: ${RAILS_DB_PASSWORD}
+    volumes:
+      - rails_db_data:/var/lib/postgresql/data
+    networks:
+      - rails_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rails_user -d zhiyara_rails"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Proxy (combines Rails + WordPress)
+  proxy:
+    image: nginx:alpine
+    container_name: zhiyara_proxy
+    restart: unless-stopped
+    depends_on:
+      - rails
+      - nginx  # WordPress nginx from main compose
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/proxy.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/sites/combined.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro  # SSL certificates
+      - proxy_logs:/var/log/nginx
+    networks:
+      - shared_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  rails_db_data:
+    driver: local
+  rails_uploads:
+    driver: local
+  proxy_logs:
+    driver: local
+
+networks:
+  rails_internal:
+    driver: bridge

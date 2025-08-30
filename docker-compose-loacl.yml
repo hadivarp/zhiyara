@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # WordPress for Local Development
+  wordpress:
+    image: wordpress:6.4-php8.1-apache
+    container_name: wordpress_local
+    restart: unless-stopped
+    depends_on:
+      - database
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: database:3306
+      WORDPRESS_DB_USER: ${WP_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WP_DB_NAME}
+      WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX:-wp_}
+      WORDPRESS_DEBUG: true
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_DEBUG', true);
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+        define('SCRIPT_DEBUG', true);
+    volumes:
+      - ./volumes/wordpress:/var/www/html
+      - ./config/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    networks:
+      - wordpress_local
+
+  # MySQL Database
+  database:
+    image: mysql:8.0
+    container_name: wordpress_db_local
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${WP_DB_NAME}
+      MYSQL_USER: ${WP_DB_USER}
+      MYSQL_PASSWORD: ${WP_DB_PASSWORD}
+    volumes:
+      - ./volumes/database:/var/lib/mysql
+      - ./backups:/backups
+    networks:
+      - wordpress_local
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: wordpress_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - database
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: database
+      PMA_USER: ${WP_DB_USER}
+      PMA_PASSWORD: ${WP_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    networks:
+      - wordpress_local
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: wordpress_redis_local
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - ./volumes/redis:/data
+    networks:
+      - wordpress_local
+
+networks:
+  wordpress_local:
+    driver: bridge

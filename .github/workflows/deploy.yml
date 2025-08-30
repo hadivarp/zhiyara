@@ -1,0 +1,81 @@
+name: Deploy WordPress to Server
+
+on:
+  push:
+    branches: [ main, production ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOCKER_REGISTRY: your-registry.com
+  IMAGE_NAME: zhiyara-wordpress
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Test Docker Build
+      run: |
+        docker-compose -f docker-compose.yml config
+        docker-compose -f docker-compose-local.yml config
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    
+    - name: Deploy to Staging Server
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          cd /var/www/zhiyara-wordpress
+          git pull origin main
+          docker-compose down
+          docker-compose up -d --build
+          docker-compose exec -T wordpress wp core update --allow-root || true
+        EOF
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/production'
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    
+    - name: Backup Database
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
+          cd /var/www/zhiyara-wordpress
+          docker-compose exec -T database mysqldump -u root -p$DB_ROOT_PASSWORD $WP_DB_NAME > backups/backup-$(date +%Y%m%d-%H%M%S).sql
+        EOF
+    
+    - name: Deploy to Production Server
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
+          cd /var/www/zhiyara-wordpress
+          git pull origin production
+          docker-compose down
+          docker-compose up -d --build
+          docker-compose exec -T wordpress wp core update --allow-root || true
+        EOF
+    
+    - name: Health Check
+      run: |
+        sleep 30
+        curl -f http://${{ secrets.PROD_HOST }}:8080/health || exit 1

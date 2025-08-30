@@ -1,0 +1,42 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# WordPress files and uploads
+volumes/wordpress/
+volumes/database/
+volumes/redis/
+
+# Backup files
+backups/*.sql
+backups/*.tar.gz
+!backups/.gitkeep
+
+# Log files
+logs/
+*.log
+nginx/logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+.docker/
+
+# Temporary files
+tmp/
+temp/
