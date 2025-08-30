@@ -93,11 +93,13 @@ fi
 # Update nginx configuration
 print_status "Updating nginx configuration..."
 
-# Copy new nginx config
-docker cp ./nginx/nginx-updated.conf crm_abz_nginx:/etc/nginx/nginx.conf
-
-# Copy WordPress site config
+# Copy WordPress site config first
 docker cp ./nginx/sites/wordpress-blog.conf crm_abz_nginx:/etc/nginx/sites-available/
+docker cp ./nginx/sites/crm-access.conf crm_abz_nginx:/etc/nginx/sites-available/
+
+# Copy new nginx config to temp location and move it
+docker cp ./nginx/nginx-updated.conf crm_abz_nginx:/tmp/nginx.conf.new
+docker exec crm_abz_nginx sh -c "mv /tmp/nginx.conf.new /etc/nginx/nginx.conf"
 
 # Test nginx configuration
 if docker exec crm_abz_nginx nginx -t; then
@@ -106,7 +108,7 @@ if docker exec crm_abz_nginx nginx -t; then
     print_success "Nginx configuration updated successfully!"
 else
     print_error "Nginx configuration test failed! Restoring backup..."
-    docker cp ./backups/nginx.conf.backup.* crm_abz_nginx:/etc/nginx/nginx.conf 2>/dev/null || true
+    docker exec crm_abz_nginx sh -c "cp /root/zhiyara/backups/nginx.conf.backup.* /etc/nginx/nginx.conf" 2>/dev/null || true
     docker exec crm_abz_nginx nginx -s reload
     exit 1
 fi
