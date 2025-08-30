@@ -118,19 +118,24 @@ cp ./nginx/sites/wordpress-blog.conf "$CRM_DIR/nginx/sites/"
 cp ./nginx/sites/crm-access.conf "$CRM_DIR/nginx/sites/"
 print_success "WordPress nginx configs copied to CRM directory"
 
-# Copy new nginx config to temp location and move it
-docker cp ./nginx/nginx-updated.conf crm_abz_nginx:/tmp/nginx.conf.new
-docker exec crm_abz_nginx sh -c "mv /tmp/nginx.conf.new /etc/nginx/nginx.conf"
+# Update main nginx config by copying to host directory and restarting
+print_status "Updating main nginx configuration..."
+cp ./nginx/nginx-updated.conf "$CRM_DIR/nginx/nginx.conf"
+
+# Restart nginx to pick up new configuration
+print_status "Restarting nginx with new configuration..."
+docker restart crm_abz_nginx
+
+# Wait for nginx to start
+sleep 10
 
 # Test nginx configuration
 if docker exec crm_abz_nginx nginx -t; then
-    print_status "Nginx configuration is valid. Reloading..."
-    docker exec crm_abz_nginx nginx -s reload
     print_success "Nginx configuration updated successfully!"
 else
     print_error "Nginx configuration test failed! Restoring backup..."
-    docker exec crm_abz_nginx sh -c "cp /root/zhiyara/backups/nginx.conf.backup.* /etc/nginx/nginx.conf" 2>/dev/null || true
-    docker exec crm_abz_nginx nginx -s reload
+    cp ./backups/nginx.conf.backup.* "$CRM_DIR/nginx/nginx.conf" 2>/dev/null || true
+    docker restart crm_abz_nginx
     exit 1
 fi
 
