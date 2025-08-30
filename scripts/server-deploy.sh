@@ -90,9 +90,9 @@ if ! docker-compose -f docker-compose.server.yml ps | grep -q "Up"; then
     exit 1
 fi
 
-# WordPress is now running standalone on port 8080
-print_status "WordPress is running on port 8080 (standalone mode)"
-print_success "No nginx integration needed - WordPress runs independently"
+# WordPress is now running completely standalone
+print_status "WordPress is running on port 8080 (completely separate from CRM)"
+print_success "Zero CRM integration - WordPress runs independently"
 
 # Final health checks
 print_status "Running final health checks..."
