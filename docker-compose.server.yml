@@ -22,6 +22,7 @@ services:
       - wordpress_data:/var/www/html
       - ./config/php.ini:/usr/local/etc/php/conf.d/custom.ini
       - ./config/wp-config-extra.php:/var/www/html/wp-config-extra.php
+      - ./wp-content/themes/zhiyara:/var/www/html/wp-content/themes/zhiyara
     networks:
       - wordpress_net  # Separate WordPress network
     healthcheck:
@@ -65,6 +66,7 @@ services:
       - wordpress
     volumes:
       - wordpress_data:/var/www/html:ro
+      - ./wp-content/themes/zhiyara:/var/www/html/wp-content/themes/zhiyara:ro
       - ./nginx/sites/wordpress.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - wordpress_net
