@@ -122,6 +122,118 @@ while (have_posts()) :
                             <p><?php echo esc_html($chef_name); ?></p>
                         </div>
                     <?php endif; ?>
+                    
+                    <!-- Motorcycle Features Section -->
+                    <?php
+                    $motorcycle_parking = get_post_meta($restaurant_id, '_motorcycle_parking', true);
+                    $helmet_storage = get_post_meta($restaurant_id, '_helmet_storage', true);
+                    $bike_wash = get_post_meta($restaurant_id, '_bike_wash', true);
+                    $rider_discount = get_post_meta($restaurant_id, '_rider_discount', true);
+                    $group_friendly = get_post_meta($restaurant_id, '_group_friendly', true);
+                    $accessibility_rating = get_post_meta($restaurant_id, '_accessibility_rating', true);
+                    
+                    if ($motorcycle_parking || $helmet_storage || $bike_wash || $rider_discount || $group_friendly || $accessibility_rating) :
+                    ?>
+                    <div class="motorcycle-section">
+                        <h3>🏍️ ویژگی‌های موتورسواری</h3>
+                        <div class="motorcycle-features-grid">
+                            <?php if ($motorcycle_parking) : ?>
+                                <div class="feature-item parking-<?php echo $motorcycle_parking; ?>">
+                                    <span class="feature-icon">🏍️</span>
+                                    <span class="feature-text">پارکینگ موتور: 
+                                        <?php 
+                                        switch($motorcycle_parking) {
+                                            case 'available': echo 'موجود'; break;
+                                            case 'limited': echo 'محدود'; break;
+                                            case 'none': echo 'ندارد'; break;
+                                        }
+                                        ?>
+                                    </span>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if ($helmet_storage === 'yes') : ?>
+                                <div class="feature-item available">
+                                    <span class="feature-icon">🪖</span>
+                                    <span class="feature-text">نگهداری امن کلاه</span>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if ($bike_wash === 'yes') : ?>
+                                <div class="feature-item available">
+                                    <span class="feature-icon">🧽</span>
+                                    <span class="feature-text">امکان شستشوی موتور</span>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if ($rider_discount) : ?>
+                                <div class="feature-item discount">
+                                    <span class="feature-icon">💰</span>
+                                    <span class="feature-text">تخفیف موتورسوار: <?php echo esc_html($rider_discount); ?></span>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if ($group_friendly === 'yes') : ?>
+                                <div class="feature-item available">
+                                    <span class="feature-icon">👥</span>
+                                    <span class="feature-text">مناسب گروه موتورسواران</span>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if ($accessibility_rating) : ?>
+                                <div class="feature-item access-<?php echo $accessibility_rating; ?>">
+                                    <span class="feature-icon">🛣️</span>
+                                    <span class="feature-text">دسترسی موتور: 
+                                        <?php 
+                                        switch($accessibility_rating) {
+                                            case 'excellent': echo 'عالی'; break;
+                                            case 'good': echo 'خوب'; break;
+                                            case 'fair': echo 'متوسط'; break;
+                                            case 'poor': echo 'ضعیف'; break;
+                                        }
+                                        ?>
+                                    </span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <!-- Zhiyara's Review -->
+                    <?php
+                    $review_date = get_post_meta($restaurant_id, '_review_date', true);
+                    ?>
+                    <div class="zhiyara-review-section">
+                        <h3>🏍️ نقد ژیارا</h3>
+                        <div class="zhiyara-review-header">
+                            <div class="zhiyara-avatar">
+                                <div class="mystery-rider">🏍️</div>
+                                <span class="reviewer-name">ژیارا</span>
+                                <span class="reviewer-subtitle">موتورسوار ناشناس</span>
+                            </div>
+                            <?php if ($review_date) : ?>
+                                <div class="review-date">
+                                    <span class="date-label">تاریخ بازدید:</span>
+                                    <span class="date-value"><?php echo esc_html(date_i18n('j F Y', strtotime($review_date))); ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="zhiyara-review-content">
+                            <div class="review-intro">
+                                <p><em>"مثل همیشه، با موتورم به این رستوران رفتم تا تجربه‌ای واقعی و بی‌طرفانه داشته باشم..."</em></p>
+                            </div>
+                            
+                            <div class="review-text">
+                                <?php the_content(); ?>
+                            </div>
+                            
+                            <div class="zhiyara-signature">
+                                <p>— ژیارا، موتورسوار ناشناس شهر</p>
+                                <div class="signature-icon">🏍️💨</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="restaurant-sidebar">

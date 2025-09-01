@@ -14,20 +14,12 @@
     <div class="container">
         <div class="header-content">
             <div class="site-branding">
-                <?php if (has_custom_logo()) : ?>
-                    <?php the_custom_logo(); ?>
-                <?php else : ?>
-                    <a href="<?php echo esc_url(home_url('/')); ?>" class="site-title">
-                        <?php bloginfo('name'); ?>
+                <h1 class="site-title">
+                    <a href="<?php echo esc_url(home_url('/')); ?>">
+                        🏍️ راهنمای ژیارا
                     </a>
-                <?php endif; ?>
-                
-                <?php 
-                $description = get_theme_mod('site_description_persian', get_bloginfo('description', 'display'));
-                if ($description || is_customize_preview()) :
-                ?>
-                    <p class="site-description"><?php echo $description; ?></p>
-                <?php endif; ?>
+                </h1>
+                <p class="site-description">نگاه موتورسوار ناشناس به رستوران‌های شهر</p>
             </div>
 
             <nav class="main-nav">

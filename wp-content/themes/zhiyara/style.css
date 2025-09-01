@@ -1,8 +1,8 @@
 /*
-Theme Name: Zhiyara Persian Restaurant Guide
-Description: راهنمای رستوران‌های فارسی - مشابه راهنمای میشلن
+Theme Name: راهنمای ژیارا - نگاه موتورسوار
+Description: راهنمای رستوران‌ها از نگاه ژیارا، موتورسوار ناشناس که مثل راهنمای میشلن رستوران‌ها را بررسی می‌کند
 Version: 1.0
-Author: Zhiyara Team
+Author: Zhiyara Motorcycle Guide
 Text Domain: zhiyara
 */
 
@@ -33,7 +33,78 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Search Form Styling */
+.search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-form input[type="search"],
+.hero-search input[type="search"] {
+    padding: 12px 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    font-size: 16px;
+    font-family: 'Vazirmatn', sans-serif;
+    background: rgba(255,255,255,0.9);
+    color: #2c3e50;
+    text-align: right;
+    direction: rtl;
+    width: 100%;
+    max-width: 300px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.search-form input[type="search"]:focus,
+.hero-search input[type="search"]:focus {
+    outline: none;
+    border-color: rgba(255,255,255,0.8);
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.search-form button,
+.hero-search button {
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'Vazirmatn', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.search-form button:hover,
+.hero-search button:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.hero-search {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+    align-items: center;
+}
+
+.hero-search form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
 }
 
 .header-content {
@@ -605,5 +676,427 @@ body {
         break-inside: avoid;
         box-shadow: none;
         border: 1px solid #ddd;
+    }
+}
+
+/* Motorcycle Features Styling */
+.motorcycle-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.motorcycle-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 500;
+    color: white;
+}
+
+.motorcycle-badge.parking {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.motorcycle-badge.access {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+}
+
+/* Single Restaurant Motorcycle Section */
+.motorcycle-section {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 30px 0;
+}
+
+.motorcycle-section h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 8px;
+}
+
+.motorcycle-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    background: white;
+}
+
+.feature-item.available {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.feature-item.parking-available {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.feature-item.parking-limited {
+    border-color: #ffc107;
+    background: #fffdf0;
+}
+
+.feature-item.parking-none {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.feature-item.discount {
+    border-color: #17a2b8;
+    background: #f0fdff;
+}
+
+.feature-item.access-excellent {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.feature-item.access-good {
+    border-color: #20c997;
+    background: #f0fff4;
+}
+
+.feature-item.access-fair {
+    border-color: #ffc107;
+    background: #fffdf0;
+}
+
+.feature-item.access-poor {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.feature-icon {
+    font-size: 1.2em;
+}
+
+.feature-text {
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Reviewer Section */
+.reviewer-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 30px 0;
+}
+
+.reviewer-section h3 {
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    padding-bottom: 8px;
+}
+
+.reviewer-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.reviewer-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.reviewer-label {
+    font-weight: 600;
+    opacity: 0.9;
+    font-size: 0.9em;
+}
+
+.reviewer-value {
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+/* About Section Styling */
+.about-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.about-text h2 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: right;
+}
+
+.about-text p {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #495057;
+    margin-bottom: 1.5rem;
+    text-align: right;
+}
+
+/* Zhiyara Story Styling */
+.zhiyara-story {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    backdrop-filter: blur(10px);
+}
+
+.story-text {
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+}
+
+.zhiyara-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 20px 0;
+    justify-content: center;
+}
+
+.zhiyara-features .feature {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+}
+
+.zhiyara-features .feature:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+.zhiyara-silhouette {
+    text-align: center;
+    padding: 40px;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.motorcycle-icon {
+    font-size: 4em;
+    margin-bottom: 15px;
+    opacity: 0.9;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.mystery-text {
+    font-style: italic;
+    opacity: 0.8;
+    font-size: 1.1em;
+    margin-top: 10px;
+}
+
+/* Zhiyara Review Section */
+.zhiyara-review-section {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin: 30px 0;
+    border: 2px solid #0f3460;
+}
+
+.zhiyara-review-section h3 {
+    color: #64b5f6;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+    text-align: center;
+}
+
+.zhiyara-review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.zhiyara-avatar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.mystery-rider {
+    font-size: 2.5em;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reviewer-name {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #64b5f6;
+}
+
+.reviewer-subtitle {
+    font-size: 0.9em;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+.review-date {
+    text-align: right;
+}
+
+.date-label {
+    display: block;
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+
+.date-value {
+    font-weight: bold;
+    color: #64b5f6;
+}
+
+.review-intro {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #64b5f6;
+}
+
+.review-intro em {
+    font-size: 1.1em;
+    color: #b3e5fc;
+}
+
+.review-text {
+    line-height: 1.8;
+    font-size: 1.1em;
+    margin-bottom: 25px;
+}
+
+.zhiyara-signature {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.zhiyara-signature p {
+    font-style: italic;
+    color: #64b5f6;
+    margin-bottom: 10px;
+}
+
+.signature-icon {
+    font-size: 1.5em;
+    opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .motorcycle-features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .reviewer-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .motorcycle-features {
+        justify-content: center;
+    }
+    
+    .zhiyara-review-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .zhiyara-features {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+    }
+    
+    .about-text h2 {
+        font-size: 2rem;
+        text-align: center;
+    }
+    
+    .about-text p {
+        text-align: center;
+    }
+    
+    .hero-search form {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .search-form input[type="search"],
+    .hero-search input[type="search"] {
+        max-width: 100%;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .header, .footer, .filter-section, .pagination-wrapper {
+        display: none;
+    }
+    
+    .restaurant-card {
+        break-inside: avoid;
+        margin-bottom: 20px;
+    }
+    
+    .motorcycle-section, .reviewer-section {
+        break-inside: avoid;
+        margin-bottom: 20px;
     }
 }

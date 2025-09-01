@@ -115,6 +115,24 @@ function zhiyara_add_restaurant_meta_boxes() {
         'normal',
         'high'
     );
+    
+    add_meta_box(
+        'motorcycle_features',
+        __('ویژگی‌های موتورسواری', 'zhiyara'),
+        'zhiyara_motorcycle_features_callback',
+        'restaurant',
+        'side',
+        'high'
+    );
+    
+    add_meta_box(
+        'reviewer_info',
+        __('🏍️ بازدید ژیارا', 'zhiyara'),
+        'zhiyara_reviewer_info_callback',
+        'restaurant',
+        'side',
+        'default'
+    );
 }
 add_action('add_meta_boxes', 'zhiyara_add_restaurant_meta_boxes');
 
@@ -183,12 +201,74 @@ function zhiyara_restaurant_details_callback($post) {
             <td><input type="text" name="restaurant_chef_name" id="restaurant_chef_name" value="<?php echo esc_attr($chef_name); ?>" class="regular-text" /></td>
         </tr>
     </table>
-    
     <?php
 }
 
-// Save Restaurant Meta Data
+// Motorcycle Features Meta Box Callback
+function zhiyara_motorcycle_features_callback($post) {
+    wp_nonce_field('zhiyara_motorcycle_features', 'zhiyara_motorcycle_features_nonce');
+    
+    $parking_available = get_post_meta($post->ID, '_motorcycle_parking', true);
+    $helmet_storage = get_post_meta($post->ID, '_helmet_storage', true);
+    $bike_wash = get_post_meta($post->ID, '_bike_wash', true);
+    $rider_discount = get_post_meta($post->ID, '_rider_discount', true);
+    $group_friendly = get_post_meta($post->ID, '_group_friendly', true);
+    $accessibility_rating = get_post_meta($post->ID, '_accessibility_rating', true);
+    
+    echo '<table class="form-table">';
+    
+    echo '<tr><th><label for="motorcycle_parking">🏍️ پارکینگ موتور:</label></th>';
+    echo '<td><select name="_motorcycle_parking" id="motorcycle_parking">';
+    echo '<option value="" ' . selected($parking_available, '', false) . '>انتخاب کنید</option>';
+    echo '<option value="available" ' . selected($parking_available, 'available', false) . '>موجود</option>';
+    echo '<option value="limited" ' . selected($parking_available, 'limited', false) . '>محدود</option>';
+    echo '<option value="none" ' . selected($parking_available, 'none', false) . '>ندارد</option>';
+    echo '</select></td></tr>';
+    
+    echo '<tr><th><label for="helmet_storage">🪖 نگهداری کلاه:</label></th>';
+    echo '<td><input type="checkbox" name="_helmet_storage" id="helmet_storage" value="yes" ' . checked($helmet_storage, 'yes', false) . '> محل امن برای کلاه</td></tr>';
+    
+    echo '<tr><th><label for="bike_wash">🧽 شستشوی موتور:</label></th>';
+    echo '<td><input type="checkbox" name="_bike_wash" id="bike_wash" value="yes" ' . checked($bike_wash, 'yes', false) . '> امکان شستشو</td></tr>';
+    
+    echo '<tr><th><label for="rider_discount">💰 تخفیف موتورسوار:</label></th>';
+    echo '<td><input type="text" name="_rider_discount" id="rider_discount" value="' . esc_attr($rider_discount) . '" placeholder="مثال: ۱۰٪ تخفیف" /></td></tr>';
+    
+    echo '<tr><th><label for="group_friendly">👥 مناسب گروه:</label></th>';
+    echo '<td><input type="checkbox" name="_group_friendly" id="group_friendly" value="yes" ' . checked($group_friendly, 'yes', false) . '> مناسب گروه موتورسواران</td></tr>';
+    
+    echo '<tr><th><label for="accessibility_rating">🛣️ دسترسی موتور:</label></th>';
+    echo '<td><select name="_accessibility_rating" id="accessibility_rating">';
+    echo '<option value="" ' . selected($accessibility_rating, '', false) . '>انتخاب کنید</option>';
+    echo '<option value="excellent" ' . selected($accessibility_rating, 'excellent', false) . '>عالی</option>';
+    echo '<option value="good" ' . selected($accessibility_rating, 'good', false) . '>خوب</option>';
+    echo '<option value="fair" ' . selected($accessibility_rating, 'fair', false) . '>متوسط</option>';
+    echo '<option value="poor" ' . selected($accessibility_rating, 'poor', false) . '>ضعیف</option>';
+    echo '</select></td></tr>';
+    
+    echo '</table>';
+}
+
+function zhiyara_reviewer_info_callback($post) {
+    wp_nonce_field('zhiyara_reviewer_info', 'zhiyara_reviewer_info_nonce');
+    
+    $reviewer_name = get_post_meta($post->ID, '_reviewer_name', true);
+    $reviewer_bike = get_post_meta($post->ID, '_reviewer_bike', true);
+    $review_date = get_post_meta($post->ID, '_review_date', true);
+    $riding_experience = get_post_meta($post->ID, '_riding_experience', true);
+    
+    echo '<table class="form-table">';
+    
+    echo '<tr><th><label for="review_date">📅 تاریخ بازدید ژیارا:</label></th>';
+    echo '<td><input type="date" name="_review_date" id="review_date" value="' . esc_attr($review_date) . '" /></td></tr>';
+    
+    echo '<tr><th colspan="2"><p style="color: #666; font-style: italic;">ژیارا موتورسوار ناشناسی است که مثل بازرسان میشلن، هویتش مخفی است و فقط تاریخ بازدید ثبت می‌شود.</p></th></tr>';
+    
+    echo '</table>';
+}
+
 function zhiyara_save_restaurant_meta($post_id) {
+    // Check nonces
     if (!isset($_POST['zhiyara_restaurant_details_nonce']) || !wp_verify_nonce($_POST['zhiyara_restaurant_details_nonce'], 'zhiyara_restaurant_details')) {
         return;
     }
@@ -201,26 +281,52 @@ function zhiyara_save_restaurant_meta($post_id) {
         return;
     }
     
+    // Restaurant details fields
     $fields = array(
-        'restaurant_star_rating',
-        'restaurant_price_range',
-        'restaurant_phone',
-        'restaurant_address',
-        'restaurant_website',
-        'restaurant_opening_hours',
-        'restaurant_featured_dish',
-        'restaurant_chef_name'
+        '_restaurant_star_rating',
+        '_restaurant_price_range',
+        '_restaurant_phone',
+        '_restaurant_address',
+        '_restaurant_website',
+        '_restaurant_opening_hours',
+        '_restaurant_featured_dish',
+        '_restaurant_chef_name'
     );
     
     foreach ($fields as $field) {
         if (isset($_POST[$field])) {
-            update_post_meta($post_id, '_' . $field, sanitize_text_field($_POST[$field]));
+            update_post_meta($post_id, $field, sanitize_text_field($_POST[$field]));
         }
+    }
+    
+    // Motorcycle features fields
+    $motorcycle_fields = array(
+        '_motorcycle_parking',
+        '_helmet_storage',
+        '_bike_wash',
+        '_rider_discount',
+        '_group_friendly',
+        '_accessibility_rating'
+    );
+    
+    foreach ($motorcycle_fields as $field) {
+        if (isset($_POST[$field])) {
+            update_post_meta($post_id, $field, sanitize_text_field($_POST[$field]));
+        } else {
+            // For checkboxes, delete if not set
+            if (in_array($field, array('_helmet_storage', '_bike_wash', '_group_friendly'))) {
+                delete_post_meta($post_id, $field);
+            }
+        }
+    }
+    
+    // Zhiyara review info (only review date since Zhiyara is anonymous)
+    if (isset($_POST['_review_date'])) {
+        update_post_meta($post_id, '_review_date', sanitize_text_field($_POST['_review_date']));
     }
 }
 add_action('save_post', 'zhiyara_save_restaurant_meta');
 
-// Enqueue Styles and Scripts
 function zhiyara_enqueue_scripts() {
     wp_enqueue_style('zhiyara-style', get_stylesheet_uri(), array(), '1.0.0');
     wp_enqueue_style('zhiyara-persian-fonts', 'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap', array(), '1.0.0');

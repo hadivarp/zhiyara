@@ -63,6 +63,39 @@ if ($cuisines && !is_wp_error($cuisines)) {
             <?php endif; ?>
             
             <div class="restaurant-meta">
+                <div class="meta-item">
+                    <span class="meta-label">دسته‌بندی:</span>
+                    <span class="meta-value"><?php echo $categories; ?></span>
+                </div>
+                
+                <?php if ($cuisines) : ?>
+                <div class="meta-item">
+                    <span class="meta-label">نوع غذا:</span>
+                    <span class="meta-value"><?php echo $cuisine_name; ?></span>
+                </div>
+                <?php endif; ?>
+                
+                <?php 
+                $motorcycle_parking = get_post_meta(get_the_ID(), '_motorcycle_parking', true);
+                $accessibility_rating = get_post_meta(get_the_ID(), '_accessibility_rating', true);
+                if ($motorcycle_parking || $accessibility_rating) : ?>
+                <div class="motorcycle-features">
+                    <?php if ($motorcycle_parking === 'available') : ?>
+                        <span class="motorcycle-badge parking">🏍️ پارکینگ موتور</span>
+                    <?php endif; ?>
+                    <?php if ($accessibility_rating === 'excellent') : ?>
+                        <span class="motorcycle-badge access">🛣️ دسترسی عالی</span>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+                
+                <?php if ($phone) : ?>
+                <div class="meta-item">
+                    <span class="meta-label">تلفن:</span>
+                    <span class="meta-value"><?php echo esc_html($phone); ?></span>
+                </div>
+                <?php endif; ?>
+                
                 <div class="restaurant-stars">
                     <?php if ($star_rating) : ?>
                         <?php echo zhiyara_display_stars($star_rating); ?>
