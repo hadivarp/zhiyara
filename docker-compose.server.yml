@@ -1,7 +1,7 @@
 version: '3.8'
 
-# WordPress integration with existing Rails CRM server
-# This adds WordPress to your existing crm_abz_net network
+# WordPress standalone setup
+# Uses .env file for environment variables
 
 services:
   # WordPress Application
